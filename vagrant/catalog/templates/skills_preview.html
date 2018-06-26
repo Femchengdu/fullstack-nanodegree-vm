@@ -1,0 +1,7 @@
+{% extends "catalog.html" %}
+{%block content%}
+	<h3>Latest Skills</h3>
+	{%for item in fs_items%}
+		{{item['name']}}<br>
+	{%endfor%}
+{%endblock%}

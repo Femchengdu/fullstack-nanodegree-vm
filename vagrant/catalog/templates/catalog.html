@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>My Skills Catalog</title>
+</head>
+<body>
+	<main>
+		<section>
+			{%for skill in fs_skills %}
+				<a href="{{url_for('show_fullstack_catalog_items', category = category, fs_skill = fs_skill)}}">
+				{{skill['name']}}<br>
+				</a>
+			{%endfor%}
+		</section>
+		<section>
+			{%block content%}{%endblock%}
+		</section>
+	</main>
+
+</body>
+</html>
