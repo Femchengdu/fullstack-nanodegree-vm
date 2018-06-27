@@ -2,6 +2,18 @@ from flask import Flask
 from flask import render_template
 app = Flask(__name__)
 
+# Import modules for database support
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from database_setup import Base, Category, SkillItem, User
+
+# Connect to the database and create the database session
+engine = create_engine('sqlite:///categoryskillwithusers.db')
+Base.metadata.bind = engine
+
+DBSession = sessionmaker(bind=engine)
+session = DBSession()
+
 
 
 @app.route('/')
