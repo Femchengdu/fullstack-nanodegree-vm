@@ -33,8 +33,8 @@ def show_fullstack_catalog_items(category):
 	return render_template('skill_items.html', items = fs_items)
 
 
-@app.route('/catalog/<fs_skill>/<fs_item>')
-def show_fullstack_catalog_item(fs_skill, fs_item):
+@app.route('/catalog/<category>/<skill_item>')
+def show_fullstack_catalog_item(category, skill_item):
 	""" Show detail for a skill item"""
 	fs_item =  {'name':'Ruby on Rails','description':'Web framework from Ruby', 'category':'Framework','id':'2'}
 	fs_item_desc = fs_item['description']
