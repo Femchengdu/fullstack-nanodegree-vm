@@ -43,7 +43,10 @@ def show_fullstack_catalog_item(category, skill_item):
 @app.route('/catalog/new')
 def new_fullstack_catalog_item():
 	""" Create a skill item"""
-	return render_template('new_skill_item.html')
+	# Find all category items
+	cat_all = session.query(Category).all()
+	options_arr = list(map(lambda x: [x.id, x.name], cat_all))
+	return render_template('new_skill_item.html', categories = options_arr)
 
 @app.route('/catalog/<user>/<fs_skill>/<fs_item>/edit')
 def edit_fullstack_catalog_item(user, fs_skill, fs_item):

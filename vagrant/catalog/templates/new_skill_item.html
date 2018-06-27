@@ -6,6 +6,10 @@
 	<label for="description">Description</label><br>
 	<input type="text" name="description"><br>
 	<label for="category">Category</label><br>
-	<input type="text" name="category"><br>
+	<select>
+		{%for cat in categories%}
+			<option value="{{cat[0]}}">{{cat[1]}}</option>
+		{%endfor%}
+	</select><br>
 	<input type="submit" value="Submit">
 </form>
