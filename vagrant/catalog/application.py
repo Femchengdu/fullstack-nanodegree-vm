@@ -48,11 +48,11 @@ def new_fullstack_catalog_item():
 	options_arr = list(map(lambda x: [x.id, x.name], cat_all))
 	return render_template('new_skill_item.html', categories = options_arr)
 
-@app.route('/catalog/<user>/<fs_skill>/<fs_item>/edit')
-def edit_fullstack_catalog_item(user, fs_skill, fs_item):
+@app.route('/catalog/<fs_item>/edit')
+def edit_fullstack_catalog_item(fs_item):
 	""" Edit a skill item"""
 	fs_item =  {'name':'CSS','description':'Styled with css','category' :'Frontend'}
-	return render_template('edit_skill_item.html', category = fs_skill, fs_item = fs_item)
+	return render_template('edit_skill_item.html', fs_item = fs_item)
 
 
 @app.route('/catalog/<user>/<fs_skill>/<fs_item>/delete')
