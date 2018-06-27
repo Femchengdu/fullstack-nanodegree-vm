@@ -36,8 +36,8 @@ def show_fullstack_catalog_items(category):
 @app.route('/catalog/<category>/<skill_item>')
 def show_fullstack_catalog_item(category, skill_item):
 	""" Show detail for a skill item"""
-	fs_item =  {'name':'Ruby on Rails','description':'Web framework from Ruby', 'category':'Framework','id':'2'}
-	fs_item_desc = fs_item['description']
+	fs_item =  session.query(SkillItem).filter_by(name = skill_item).one()
+	fs_item_desc = fs_item.description
 	return render_template('skill_item.html', item = fs_item_desc)
 
 @app.route('/catalog/<user>/<fs_skill>/<fs_item>/new')
