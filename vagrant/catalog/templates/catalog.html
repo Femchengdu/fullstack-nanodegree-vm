@@ -7,7 +7,7 @@
 	<main>
 		<section>
 			{%for skill in fs_skills %}
-				<a href="{{url_for('show_fullstack_catalog_items', category = category, fs_skill = fs_skill)}}">
+				<a href="{{url_for('show_fullstack_catalog_items', category= skill['name'])}}">
 				{{skill['name']}}<br>
 				</a>
 			{%endfor%}

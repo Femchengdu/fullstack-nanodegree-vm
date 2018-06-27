@@ -25,11 +25,10 @@ def show_fullstack_catalog():
 	return render_template('skills_preview.html', fs_skills = fs_skills, fs_items = fs_items)
 
 
-@app.route('/catalog/category/fs_skill/')
-def show_fullstack_catalog_items():
+@app.route('/catalog/<category>/')
+def show_fullstack_catalog_items(category):
 	""" Show all items for a skill """
-	# Search for skills where the category == fs_skill
-	
+	# Search for skills where the category == category
 	fs_items = session.query(SkillItem).all()
 	return render_template('skill_items.html', items = fs_items)
 
