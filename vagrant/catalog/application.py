@@ -40,10 +40,10 @@ def show_fullstack_catalog_item(category, skill_item):
 	fs_item_desc = fs_item.description
 	return render_template('skill_item.html', item = fs_item_desc)
 
-@app.route('/catalog/<user>/<fs_skill>/<fs_item>/new')
-def new_fullstack_catalog_item(user, fs_item, fs_skill):
+@app.route('/catalog/new')
+def new_fullstack_catalog_item():
 	""" Create a skill item"""
-	return render_template('new_skill_item.html', category = fs_skill, user = user)
+	return render_template('new_skill_item.html')
 
 @app.route('/catalog/<user>/<fs_skill>/<fs_item>/edit')
 def edit_fullstack_catalog_item(user, fs_skill, fs_item):
