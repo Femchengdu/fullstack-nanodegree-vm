@@ -19,8 +19,8 @@ session = DBSession()
 @app.route('/')
 @app.route('/catalog')
 def show_fullstack_catalog():
-	fs_skills = [{'name': 'Back End', 'id': '1'}, {'name':'Front End', 'id':'2'}, {'name':'APIs', 'id':'3'}, {'name':'Frameworks', 'id':'4'}]
-	fs_items = [ {'name':'Python', 'description':'Object oriented with lots of libraries','category' :'Back End', 'id':'1'}, {'name':'Ruby on Rails','description':'Web framework from Ruby', 'category':'Framework','id':'2'},{'name':'Flask', 'description':'Web framework with python', 'category':'Framework','id':'3'},{'name':'CSS', 'description':'Frontend styles', 'category':'Front End','id':'4'},{'name':'Ruby', 'description':'Object oriented programing language', 'category':'Back End','id':'5'} ]
+	fs_skills = session.query(Category).all()
+	fs_items = session.query(SkillItem).all()
 	""" List all catalog categories and first five catelog items """
 	return render_template('skills_preview.html', fs_skills = fs_skills, fs_items = fs_items)
 
@@ -28,7 +28,9 @@ def show_fullstack_catalog():
 @app.route('/catalog/category/fs_skill/')
 def show_fullstack_catalog_items():
 	""" Show all items for a skill """
-	fs_items = [{'name':'Ruby on Rails','description':'Web framework from Ruby', 'category':'Framework','id':'2'},{'name':'Flask', 'description':'Web framework with python', 'category':'Framework','id':'3'}]
+	# Search for skills where the category == fs_skill
+	
+	fs_items = session.query(SkillItem).all()
 	return render_template('skill_items.html', items = fs_items)
 
 
