@@ -57,10 +57,10 @@ def edit_fullstack_catalog_item(fs_item):
 	return render_template('edit_skill_item.html', fs_item = item, options = options_arr)
 
 
-@app.route('/catalog/<user>/<fs_skill>/<fs_item>/delete')
-def delete_fullstack_catalog_item(user, fs_skill, fs_item):
+@app.route('/catalog/<fs_item>/delete')
+def delete_fullstack_catalog_item(fs_item):
 	""" Delete a skill item"""
-	return render_template('delete_skill_item.html', category = fs_skill, user = user)
+	return render_template('delete_skill_item.html')
 
 
 if __name__ == '__main__':
