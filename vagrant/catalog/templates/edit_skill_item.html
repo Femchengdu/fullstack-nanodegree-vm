@@ -1,18 +1,20 @@
-<h3>Edit a skill note that you need to be logged in to do this and this should reflect in the path chengdu_ruby_python!</h3>
-<form action="#" method = "post">
-	<label for="title">Title</label><br>
-	<input type="text" name="name" value="{{fs_item.name}}"><br>
-	<label for="description">Description</label><br>
-	<input type="text" name="name" value="{{fs_item.description}}"><br>
-	<label for="category">Category</label><br>
-	<select>
-		{%for opt in options%}
-			{% if opt[1] == fs_item.category.name %}
-				<option value="{{opt[0]}}" selected>{{opt[1]}}</option>
-			{% else %}
-				<option value="{{opt[0]}}">{{opt[1]}}</option>
-			{% endif %}
-		{%endfor%}
-	</select><br>
-	<input type="submit" value="Submit">
-</form>
+<section>
+	<h3>Edit Item</h3>
+	<form action="#" method = "post">
+		<label for="title">Title</label><br>
+		<input type="text" name="name" value="{{fs_item.name}}"><br>
+		<label for="description">Description</label><br>
+		<input type="text" name="name" value="{{fs_item.description}}"><br>
+		<label for="category">Category</label><br>
+		<select>
+			{%for opt in options%}
+				{% if opt[1] == fs_item.category.name %}
+					<option value="{{opt[0]}}" selected>{{opt[1]}}</option>
+				{% else %}
+					<option value="{{opt[0]}}">{{opt[1]}}</option>
+				{% endif %}
+			{%endfor%}
+		</select><br>
+		<input type="submit" value="Submit">
+	</form>
+</section>
