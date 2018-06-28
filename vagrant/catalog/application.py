@@ -66,8 +66,7 @@ def edit_fullstack_catalog_item(fs_item):
 		session.add(item)
 		session.commit()
 		return redirect(url_for('show_fullstack_catalog'))
-		# You can change the name you send to the template form fs_item to something else to demostrate your understanding
-	return render_template('edit_skill_item.html', fs_item = item, options = options_arr)
+	return render_template('edit_skill_item.html', skill_item = item, options = options_arr)
 
 
 @app.route('/catalog/<fs_item>/delete', methods=['GET', 'POST'])
