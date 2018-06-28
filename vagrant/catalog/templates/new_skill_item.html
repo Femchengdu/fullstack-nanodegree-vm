@@ -1,12 +1,12 @@
 <h3>New Skill Item</h3>
 
-<form action="#" method = "post">
+<form action="{{url_for('new_fullstack_catalog_item')}}" method = "post">
 	<label for="title">Title</label><br>
 	<input type="text" name="title"><br>
 	<label for="description">Description</label><br>
 	<input type="text" name="description"><br>
 	<label for="category">Category</label><br>
-	<select>
+	<select name="category">
 		{%for cat in categories%}
 			<option value="{{cat[0]}}">{{cat[1]}}</option>
 		{%endfor%}

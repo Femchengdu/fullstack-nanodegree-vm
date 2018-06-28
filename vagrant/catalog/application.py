@@ -1,5 +1,4 @@
-from flask import Flask
-from flask import render_template
+from flask import Flask, render_template, request, redirect, url_for
 app = Flask(__name__)
 
 # Import modules for database support
@@ -40,24 +39,38 @@ def show_fullstack_catalog_item(category, skill_item):
 	fs_item_desc = fs_item.description
 	return render_template('skill_item.html', item = fs_item_desc)
 
-@app.route('/catalog/new')
+@app.route('/catalog/new', methods=['GET', 'POST'])
 def new_fullstack_catalog_item():
 	""" Create a skill item"""
 	# Find all category items
 	cat_all = session.query(Category).all()
 	options_arr = list(map(lambda x: [x.id, x.name], cat_all))
+	if request.method == 'POST':
+		# User_id 1 hard coded until I impliment the authorization functionality
+		new_item = SkillItem(name = request.form['title'], description = request.form['description'], user_id = 1, category_id = request.form['category'])
+		session.add(new_item)
+		session.commit()
+		return redirect(url_for('show_fullstack_catalog'))
 	return render_template('new_skill_item.html', categories = options_arr)
 
-@app.route('/catalog/<fs_item>/edit')
+@app.route('/catalog/<fs_item>/edit', methods=['GET', 'POST'])
 def edit_fullstack_catalog_item(fs_item):
 	""" Edit a skill item"""
 	item =  session.query(SkillItem).filter_by(name = fs_item).one()
 	cat_all = session.query(Category).all()
 	options_arr = list(map(lambda x: [x.id, x.name], cat_all))
+	if request.method == 'POST':
+		item.name = request.form['name']
+		item.description = request.form['description']
+		item.category_id = request.form['category']
+		session.add(item)
+		session.commit()
+		return redirect(url_for('show_fullstack_catalog'))
+		# You can change the name you send to the template form fs_item to something else to demostrate your understanding
 	return render_template('edit_skill_item.html', fs_item = item, options = options_arr)
 
 
-@app.route('/catalog/<fs_item>/delete')
+@app.route('/catalog/<fs_item>/delete', methods=['GET', 'POST'])
 def delete_fullstack_catalog_item(fs_item):
 	""" Delete a skill item"""
 	return render_template('delete_skill_item.html')

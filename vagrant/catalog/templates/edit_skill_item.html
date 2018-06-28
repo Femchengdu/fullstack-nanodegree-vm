@@ -1,12 +1,12 @@
 <section>
 	<h3>Edit Item</h3>
-	<form action="#" method = "post">
+	<form action="{{url_for('edit_fullstack_catalog_item', fs_item = fs_item.name)}}" method = "post">
 		<label for="title">Title</label><br>
 		<input type="text" name="name" value="{{fs_item.name}}"><br>
 		<label for="description">Description</label><br>
-		<input type="text" name="name" value="{{fs_item.description}}"><br>
+		<input type="text" name="description" value="{{fs_item.description}}"><br>
 		<label for="category">Category</label><br>
-		<select>
+		<select name="category">
 			{%for opt in options%}
 				{% if opt[1] == fs_item.category.name %}
 					<option value="{{opt[0]}}" selected>{{opt[1]}}</option>
