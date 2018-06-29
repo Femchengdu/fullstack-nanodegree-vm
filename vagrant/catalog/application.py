@@ -72,12 +72,12 @@ def edit_fullstack_catalog_item(fs_item):
 @app.route('/catalog/<fs_item>/delete', methods=['GET', 'POST'])
 def delete_fullstack_catalog_item(fs_item):
 	""" Delete a skill item"""
+	item =  session.query(SkillItem).filter_by(name = fs_item).one()
 	if request.method == 'POST':
-		item =  session.query(SkillItem).filter_by(name = fs_item).one()
 		session.delete(item)
 		session.commit()
 		return redirect(url_for('show_fullstack_catalog'))
-	return render_template('delete_skill_item.html')
+	return render_template('delete_skill_item.html', item=item)
 
 
 if __name__ == '__main__':
