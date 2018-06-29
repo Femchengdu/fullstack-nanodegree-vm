@@ -6,6 +6,19 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from database_setup import Base, Category, SkillItem, User
 
+
+# Imports for the secret login
+from flask import session as login_session
+import random, string
+
+
+# New login path with token
+@app.route('/login')
+def login():
+	state = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in xrange(32))
+	login_session['state'] = state
+	return "The current session state is %s" %login_session['state']
+	
 # Connect to the database and create the database session
 engine = create_engine('sqlite:///categoryskillwithusers.db')
 Base.metadata.bind = engine
@@ -81,5 +94,7 @@ def delete_fullstack_catalog_item(fs_item):
 
 
 if __name__ == '__main__':
+	# Add the super secret
+	app.secret_key = 'chengdu_ruby_python'
 	app.debug = True
 	app.run(host = '0.0.0.0', port = 8000)
