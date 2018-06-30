@@ -13,106 +13,18 @@ import random, string
 
 
 # Import modules for flow control
-from oauth2client.client import flow_from_clientsecrets
-from oauth2client.client import FlowExchangeError
+# from oauth2client.client import flow_from_clientsecrets
+# from oauth2client.client import FlowExchangeError
+# I think these once will do the trick
+import google.oauth2.credentials
+import google_auth_oauthlib.flow
 import httplib2
 import json
 from flask import make_response
 import requests
 
 
-CLIENT_ID = json.loads(open('client_secret.json', 'r').read())['web']['client_id']
 
-
-# New login path with token
-@app.route('/login')
-def login():
-	state = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in xrange(32))
-	login_session['state'] = state
-	return render_template('login.html', STATE=state)
-
-
-@app.route('/gconnect', methods=['POST'])
-def gconnect():
-    # Validate state token
-    if request.args.get('state') != login_session['state']:
-        response = make_response(json.dumps('Invalid state parameter.'), 401)
-        response.headers['Content-Type'] = 'application/json'
-        return response
-    # Obtain authorization code
-    code = request.data
-
-    try:
-        # Upgrade the authorization code into a credentials object
-        oauth_flow = flow_from_clientsecrets('client_secret.json', scope='')
-        oauth_flow.redirect_uri = 'postmessage'
-        credentials = oauth_flow.step2_exchange(code)
-    except FlowExchangeError:
-        response = make_response(
-            json.dumps('Failed to upgrade the authorization code.'), 401)
-        response.headers['Content-Type'] = 'application/json'
-        return response
-
-    # Check that the access token is valid.
-    access_token = credentials.access_token
-    url = ('https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=%s'
-           % access_token)
-    h = httplib2.Http()
-    result = json.loads(h.request(url, 'GET')[1])
-    # If there was an error in the access token info, abort.
-    if result.get('error') is not None:
-        response = make_response(json.dumps(result.get('error')), 500)
-        response.headers['Content-Type'] = 'application/json'
-        return response
-
-    # Verify that the access token is used for the intended user.
-    gplus_id = credentials.id_token['sub']
-    if result['user_id'] != gplus_id:
-        response = make_response(
-            json.dumps("Token's user ID doesn't match given user ID."), 401)
-        response.headers['Content-Type'] = 'application/json'
-        return response
-
-    # Verify that the access token is valid for this app.
-    if result['issued_to'] != CLIENT_ID:
-        response = make_response(
-            json.dumps("Token's client ID does not match app's."), 401)
-        print "Token's client ID does not match app's."
-        response.headers['Content-Type'] = 'application/json'
-        return response
-
-    stored_access_token = login_session.get('access_token')
-    stored_gplus_id = login_session.get('gplus_id')
-    if stored_access_token is not None and gplus_id == stored_gplus_id:
-        response = make_response(json.dumps('Current user is already connected.'),
-                                 200)
-        response.headers['Content-Type'] = 'application/json'
-        return response
-
-    # Store the access token in the session for later use.
-    login_session['access_token'] = credentials.access_token
-    login_session['gplus_id'] = gplus_id
-
-    # Get user info
-    userinfo_url = "https://www.googleapis.com/oauth2/v1/userinfo"
-    params = {'access_token': credentials.access_token, 'alt': 'json'}
-    answer = requests.get(userinfo_url, params=params)
-
-    data = answer.json()
-
-    login_session['username'] = data['name']
-    login_session['picture'] = data['picture']
-    login_session['email'] = data['email']
-
-    output = ''
-    output += '<h1>Welcome, '
-    output += login_session['username']
-    output += '!</h1>'
-    output += '<img src="'
-    output += login_session['picture']
-    output += ' " style = "width: 300px; height: 300px;border-radius: 150px;-webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
-    print "done!"
-    return output
 
 	
 # Connect to the database and create the database session
@@ -127,10 +39,17 @@ session = DBSession()
 @app.route('/')
 @app.route('/catalog')
 def show_fullstack_catalog():
-	fs_skills = session.query(Category).all()
-	fs_items = session.query(SkillItem).all()
-	""" List all catalog categories and first five catelog items """
-	return render_template('skills_preview.html', fs_skills = fs_skills, fs_items = fs_items)
+    # Set things up for the login link
+    flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file('client_secrets.json',
+    scopes=['openid', 'email'],
+    redirect_uri='http://localhost:8000/gconnect')
+    #flow.redirect_uri = 'http://localhost:8000/gconnect'
+    authorization_url, state = flow.authorization_url(access_type='offline', include_granted_scopes='true')
+    #return '<a href="%s">link text</a>' % authorization_url
+    fs_skills = session.query(Category).all()
+    fs_items = session.query(SkillItem).all()
+    """ List all catalog categories and first five catelog items """
+    return render_template('skills_preview.html', fs_skills = fs_skills, fs_items = fs_items, login_link = authorization_url)
 
 
 @app.route('/catalog/<category>/')
@@ -187,6 +106,37 @@ def delete_fullstack_catalog_item(fs_item):
 		session.commit()
 		return redirect(url_for('show_fullstack_catalog'))
 	return render_template('delete_skill_item.html', item=item)
+
+
+@app.route('/gconnect')
+def gconnect():
+    flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file('client_secrets.json',
+    scopes=['openid', 'email'],
+    redirect_uri='http://localhost:8000/gconnect')
+    authorization_response = request.args.get("code", "")
+    
+    #print authorization_response[0]
+    #print "The access token is %s" % 
+    login_session['access_token'] = flow.fetch_token(code=authorization_response)['access_token']
+    userinfo_url = "https://www.googleapis.com/oauth2/v1/userinfo"
+    params = {'access_token': login_session['access_token'], 'alt': 'json'}
+    answer = requests.get(userinfo_url, params=params)
+    data = answer.json()
+
+    # reder a template
+    login_session['username'] = data['name']
+    login_session['picture'] = data['picture']
+    login_session['email'] = data['email']
+
+    output = ''
+    output += '<h1>Welcome, '
+    output += login_session['username']
+    output += '!</h1>'
+    output += '<img src="'
+    output += login_session['picture']
+    output += ' " style = "width: 300px; height: 300px;border-radius: 150px;-webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
+    print "done!"
+    return output
 
 
 if __name__ == '__main__':
