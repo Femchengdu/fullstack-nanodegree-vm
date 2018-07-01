@@ -79,8 +79,7 @@ def new_fullstack_catalog_item():
 	# Make an options dictionary of arrays from all the cattegories
 	options_arr = list(map(lambda x: [x.id, x.name], cat_all))
 	if request.method == 'POST':
-		# User_id 1 hard coded until I impliment the authorization functionality
-		new_item = SkillItem(name = request.form['title'], description = request.form['description'], user_id = 1, category_id = request.form['category'])
+		new_item = SkillItem(name = request.form['title'], description = request.form['description'], user_id = login_session['user_id'], category_id = request.form['category'])
 		session.add(new_item)
 		session.commit()
 		return redirect(url_for('show_fullstack_catalog'))
@@ -136,11 +135,20 @@ def gconnect():
     answer = requests.get(userinfo_url, params=params)
     data = answer.json()
 
-    # reder a template
+    # Create a user profile
     login_session['username'] = data['name']
     login_session['picture'] = data['picture']
     login_session['email'] = data['email']
+    if get_user_id(login_session['email']) != None:
+    	login_session['user_id'] = get_user_id(login_session['email'])
+    	print 'Setting user id from the datbase'
+    else:
+    	#login_session['user_id'] = create_user(login_session)
+    	print 'Creating a new user and setting user id from the database'
 
+
+
+    # render a template
     output = ''
     output += '<h1>Welcome, '
     output += login_session['username']
@@ -179,7 +187,31 @@ def gdisconnect():
 
 
 
+# Code for the local permissions sysemem
 
+def get_user_id(login_email):
+	""" Returns the logged in users user id if they are in the users database"""
+	try:
+		user = session.query(User).filter_by(email = login_email).one()
+		return user.id
+	except:
+		return None
+
+
+def get_user_info(user_id):
+	""" This returns the user object from the database"""
+	user = session.query(User).filter_by(id = user_id).one()
+	return user
+
+
+def create_user(login_session):
+	"""Create a new user from the login session details"""
+	new_user = User(name = login_session['username'], email = login_session['email'], picture = login_session['picture'])
+	session.add(new_user)
+	session.commit()
+	# Query the database for the user just created
+	user = session.query(User).filter_by(email = login_session['email']).one()
+	return user.id
 
 
 if __name__ == '__main__':
