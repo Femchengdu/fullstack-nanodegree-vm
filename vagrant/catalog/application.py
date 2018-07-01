@@ -139,6 +139,36 @@ def gconnect():
     return output
 
 
+#Try disconnecting from the server
+@app.route('/gdisconnect')
+def gdisconnect():
+	# Refactor so it does not break the code if  the user isn't logged in (keyError: 'access_token')
+	if login_session['access_token']:
+		print 'The access token is %s' % login_session['access_token']
+		print 'The username is: %s' % login_session['username']
+		disconnect_url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % login_session['access_token']
+		# Make the http call
+		http_obj = httplib2.Http()
+		req_result = http_obj.request(disconnect_url, 'GET')[0]
+		print 'The request reslut is %s' % req_result
+		if req_result['status'] == '200':
+			del login_session['access_token']
+			del login_session['username']
+			del login_session['email']
+			del login_session['picture']
+			response = make_response(json.dumps('You have successfully disconnected.'), 200)
+			response.headers['Content-Type'] = 'application/json'
+			return response
+		else:
+			response = make_response(json.dumps('Failed to disconnected.'), 400)
+			response.headers['Content-Type'] = 'application/json'
+			return response
+
+
+
+
+
+
 if __name__ == '__main__':
 	# Add the super secret
 	app.secret_key = 'chengdu_ruby_python'
