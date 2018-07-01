@@ -43,7 +43,9 @@ def show_fullstack_catalog():
     flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file('client_secrets.json',
     scopes=['openid', 'email'],
     redirect_uri='http://localhost:8000/gconnect')
-    #flow.redirect_uri = 'http://localhost:8000/gconnect'
+    # Here you have not set the site state(Find out how you can set this before display.)
+    # can you set things up outside this method and pss in the important values as a contstant?
+    # or example a method call 
     authorization_url, state = flow.authorization_url(access_type='offline', include_granted_scopes='true')
     #return '<a href="%s">link text</a>' % authorization_url
     fs_skills = session.query(Category).all()
@@ -65,7 +67,16 @@ def show_fullstack_catalog_item(category, skill_item):
 	""" Show detail for a skill item"""
 	fs_item =  session.query(SkillItem).filter_by(name = skill_item).one()
 	fs_item_desc = fs_item.description
-	return render_template('skill_item.html', item = fs_item_desc)
+	# Pass the creator object here for display on the page.
+	creator = get_user_info(fs_item.user_id)
+	#print 'The creator name is %s ' % creator.name
+	if 'user_id' in login_session and (login_session['user_id'] == creator.id):
+		print 'The login sesssion id is: %d' % login_session['user_id']
+		print 'The skill creator is logged in! you may edit or delete this item.'
+		return render_template('skill_item.html', item = fs_item, creator_obj = creator)
+	else:
+		print 'You are not the skill creator you are viewing the public page'
+		return render_template('public_skill_item.html', item = fs_item, creator_obj = creator)
 
 @app.route('/catalog/new', methods=['GET', 'POST'])
 def new_fullstack_catalog_item():
@@ -173,6 +184,7 @@ def gdisconnect():
 		req_result = http_obj.request(disconnect_url, 'GET')[0]
 		print 'The request reslut is %s' % req_result
 		if req_result['status'] == '200':
+			del login_session['user_id']
 			del login_session['access_token']
 			del login_session['username']
 			del login_session['email']
