@@ -143,7 +143,7 @@ def gconnect():
     	login_session['user_id'] = get_user_id(login_session['email'])
     	print 'Setting user id from the datbase'
     else:
-    	#login_session['user_id'] = create_user(login_session)
+    	login_session['user_id'] = create_user(login_session)
     	print 'Creating a new user and setting user id from the database'
 
 
