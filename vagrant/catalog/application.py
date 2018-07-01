@@ -99,11 +99,13 @@ def new_fullstack_catalog_item():
 @app.route('/catalog/<fs_item>/edit', methods=['GET', 'POST'])
 def edit_fullstack_catalog_item(fs_item):
 	# Check to see if the user is logged in
-	if 'username' not in login_session:
-		# return the user to the home page where the login link resides
-		return redirect('/')
 	""" Edit a skill item"""
 	item =  session.query(SkillItem).filter_by(name = fs_item).one()
+	#if 'user_id' not in login_session:
+	if 'user_id' not in login_session or (login_session['user_id'] != item.user_id):	
+		# return the user to the home page and maybe flash a message saying you don't have permission
+		return redirect('/')
+	# Continue if user passes verification	
 	cat_all = session.query(Category).all()
 	options_arr = list(map(lambda x: [x.id, x.name], cat_all))
 	if request.method == 'POST':
@@ -119,11 +121,14 @@ def edit_fullstack_catalog_item(fs_item):
 @app.route('/catalog/<fs_item>/delete', methods=['GET', 'POST'])
 def delete_fullstack_catalog_item(fs_item):
 	# Check to see if the user is logged in
-	if 'username' not in login_session:
-		# return the user to the home page where the login link resides
-		return redirect('/')
+	
 	""" Delete a skill item"""
 	item =  session.query(SkillItem).filter_by(name = fs_item).one()
+	#if 'user_id' not in login_session:
+	if 'user_id' not in login_session or (login_session['user_id'] != item.user_id):	
+		# return the user to the home page and maybe flash a message saying you don't have permission
+		return redirect('/')
+	# If user passes the verification
 	if request.method == 'POST':
 		session.delete(item)
 		session.commit()
