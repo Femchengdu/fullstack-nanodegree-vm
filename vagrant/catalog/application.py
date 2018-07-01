@@ -70,8 +70,13 @@ def show_fullstack_catalog_item(category, skill_item):
 @app.route('/catalog/new', methods=['GET', 'POST'])
 def new_fullstack_catalog_item():
 	""" Create a skill item"""
+	# Check to see if the user is logged in
+	if 'username' not in login_session:
+		# return the user to the home page where the login link resides
+		return redirect('/')
 	# Find all category items
 	cat_all = session.query(Category).all()
+	# Make an options dictionary of arrays from all the cattegories
 	options_arr = list(map(lambda x: [x.id, x.name], cat_all))
 	if request.method == 'POST':
 		# User_id 1 hard coded until I impliment the authorization functionality
@@ -83,6 +88,10 @@ def new_fullstack_catalog_item():
 
 @app.route('/catalog/<fs_item>/edit', methods=['GET', 'POST'])
 def edit_fullstack_catalog_item(fs_item):
+	# Check to see if the user is logged in
+	if 'username' not in login_session:
+		# return the user to the home page where the login link resides
+		return redirect('/')
 	""" Edit a skill item"""
 	item =  session.query(SkillItem).filter_by(name = fs_item).one()
 	cat_all = session.query(Category).all()
@@ -99,6 +108,10 @@ def edit_fullstack_catalog_item(fs_item):
 
 @app.route('/catalog/<fs_item>/delete', methods=['GET', 'POST'])
 def delete_fullstack_catalog_item(fs_item):
+	# Check to see if the user is logged in
+	if 'username' not in login_session:
+		# return the user to the home page where the login link resides
+		return redirect('/')
 	""" Delete a skill item"""
 	item =  session.query(SkillItem).filter_by(name = fs_item).one()
 	if request.method == 'POST':
