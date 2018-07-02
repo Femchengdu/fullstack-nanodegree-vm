@@ -35,23 +35,13 @@ DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
 
-
 @app.route('/')
 @app.route('/catalog')
 def show_fullstack_catalog():
-    # Set things up for the login link
-    flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file('client_secrets.json',
-    scopes=['openid', 'email'],
-    redirect_uri='http://localhost:8000/gconnect')
-    # Here you have not set the site state(Find out how you can set this before display.)
-    # can you set things up outside this method and pss in the important values as a contstant?
-    # or example a method call 
-    authorization_url, state = flow.authorization_url(access_type='offline', include_granted_scopes='true')
-    #return '<a href="%s">link text</a>' % authorization_url
     fs_skills = session.query(Category).all()
     fs_items = session.query(SkillItem).all()
     """ List all catalog categories and first five catelog items """
-    return render_template('skills_preview.html', fs_skills = fs_skills, fs_items = fs_items, login_link = authorization_url)
+    return render_template('skills_preview.html', fs_skills = fs_skills, fs_items = fs_items, user_state = login_session)
 
 
 @app.route('/catalog/<category>/')
@@ -59,7 +49,7 @@ def show_fullstack_catalog_items(category):
 	""" Show all items for a skill """
 	# Search for skills where the category == category
 	fs_items = session.query(SkillItem).all()
-	return render_template('skill_items.html', items = fs_items)
+	return render_template('skill_items.html', items = fs_items, user_state = login_session)
 
 
 @app.route('/catalog/<category>/<skill_item>')
@@ -73,10 +63,10 @@ def show_fullstack_catalog_item(category, skill_item):
 	if 'user_id' in login_session and (login_session['user_id'] == creator.id):
 		print 'The login sesssion id is: %d' % login_session['user_id']
 		print 'The skill creator is logged in! you may edit or delete this item.'
-		return render_template('skill_item.html', item = fs_item, creator_obj = creator)
+		return render_template('skill_item.html', item = fs_item, creator_obj = creator, user_state = login_session)
 	else:
 		print 'You are not the skill creator you are viewing the public page'
-		return render_template('public_skill_item.html', item = fs_item, creator_obj = creator)
+		return render_template('public_skill_item.html', item = fs_item, creator_obj = creator, user_state = login_session)
 
 @app.route('/catalog/new', methods=['GET', 'POST'])
 def new_fullstack_catalog_item():
@@ -94,7 +84,7 @@ def new_fullstack_catalog_item():
 		session.add(new_item)
 		session.commit()
 		return redirect(url_for('show_fullstack_catalog'))
-	return render_template('new_skill_item.html', categories = options_arr)
+	return render_template('new_skill_item.html', categories = options_arr, user_state = login_session)
 
 @app.route('/catalog/<fs_item>/edit', methods=['GET', 'POST'])
 def edit_fullstack_catalog_item(fs_item):
@@ -115,7 +105,7 @@ def edit_fullstack_catalog_item(fs_item):
 		session.add(item)
 		session.commit()
 		return redirect(url_for('show_fullstack_catalog'))
-	return render_template('edit_skill_item.html', skill_item = item, options = options_arr)
+	return render_template('edit_skill_item.html', skill_item = item, options = options_arr, user_state = login_session)
 
 
 @app.route('/catalog/<fs_item>/delete', methods=['GET', 'POST'])
@@ -133,11 +123,28 @@ def delete_fullstack_catalog_item(fs_item):
 		session.delete(item)
 		session.commit()
 		return redirect(url_for('show_fullstack_catalog'))
-	return render_template('delete_skill_item.html', item=item)
+	return render_template('delete_skill_item.html', item=item, user_state = login_session)
+
+# Try out an idea, what the heck
+@app.route('/login_link')
+def login_link():
+	# Create state
+	state = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in xrange(32))
+	# Set state in the login_session
+	login_session['state'] = state
+	# create request url
+	flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file('client_secrets.json',
+    scopes=['openid', 'email'],
+    redirect_uri='http://localhost:8000/gconnect')
+	# set the state in the request
+	authorization_url, state = flow.authorization_url(access_type='offline', include_granted_scopes='true')
+	# redirect to the url with state as parameter included
+	return redirect(authorization_url)
 
 
 @app.route('/gconnect')
 def gconnect():
+	# What do these lines of code do here? Set up the flow object for exchange of code to token
     flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file('client_secrets.json',
     scopes=['openid', 'email'],
     redirect_uri='http://localhost:8000/gconnect')

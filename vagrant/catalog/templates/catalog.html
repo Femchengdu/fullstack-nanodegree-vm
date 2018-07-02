@@ -5,9 +5,7 @@
 </head>
 <body>
 	<main>
-	<section>
-		<a href="{{login_link}}">Login</a>
-	</section>
+		{%include "login_header.html"%}
 		<section>
 			{%for skill in fs_skills %}
 				<a href="{{url_for('show_fullstack_catalog_items', category= skill['name'])}}">

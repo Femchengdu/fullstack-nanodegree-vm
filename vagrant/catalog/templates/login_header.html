@@ -1,0 +1,7 @@
+<section>
+	{% if 'user_id' not in user_state %}
+		<a href="{{url_for('login_link')}}">Login</a>
+	{% else %}
+		<a href="{{url_for('gdisconnect')}}">Logout</a>
+	{% endif %}
+</section>

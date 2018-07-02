@@ -1,3 +1,4 @@
+{% include "login_header.html" %}
 <h3>List all skills note that you need to be logged in to do this and this should reflect in the path chengdu_ruby_python!</h3>
 {%for item in items%}
 <a href="{{url_for('show_fullstack_catalog_item', category = item.category.name, skill_item = item.name)}}">
