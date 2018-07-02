@@ -50,7 +50,7 @@ def show_fullstack_catalog_items(category):
 	# Search for skills where the category == category
 	category =  session.query(Category).filter_by(name = category).one()
 	fs_items = session.query(SkillItem).filter_by(category_id = category.id)
-	return render_template('skill_items.html', items = fs_items, user_state = login_session)
+	return render_template('skill_items.html', items = fs_items, user_state = login_session, item_category = category.name)
 
 
 @app.route('/catalog/<category>/<skill_item>')
