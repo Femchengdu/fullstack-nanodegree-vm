@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 app = Flask(__name__)
 
 # Import modules for database support
@@ -240,6 +240,19 @@ def create_user(login_session):
 	# Query the database for the user just created
 	user = session.query(User).filter_by(email = login_session['email']).one()
 	return user.id
+
+
+# Get all skills
+@app.route('/api/items')
+def items():
+	return get_all_skills()
+
+
+# Define the get_all_skills method
+def get_all_skills():
+	# Get all skills
+	skills = session.query(SkillItem).all()
+	return jsonify(items=[i.serialize for i in skills])
 
 
 if __name__ == '__main__':

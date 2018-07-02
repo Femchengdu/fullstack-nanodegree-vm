@@ -33,6 +33,15 @@ class SkillItem(Base):
 	user_id = Column(Integer, ForeignKey('user.id'))
 	user = relationship(User)
 
+	@property
+	def serialize(self):
+		"""This will return skill item data in a serializeable format"""
+		return {
+				'id': self.id,
+				'name': self.name,
+				'description': self.description
+				}
+
 
 engine = create_engine('sqlite:///categoryskillwithusers.db')
 
