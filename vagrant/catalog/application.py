@@ -36,7 +36,7 @@ session = DBSession()
 
 
 @app.route('/')
-@app.route('/catalog')
+@app.route('/catalog/')
 def show_fullstack_catalog():
     fs_categories = session.query(Category).all()
     fs_items = session.query(SkillItem).all()
@@ -88,6 +88,7 @@ def new_fullstack_catalog_item():
 		return redirect(url_for('show_fullstack_catalog'))
 	return render_template('new_skill_item.html', categories = options_arr, user_state = login_session)
 
+
 @app.route('/catalog/<fs_item>/edit', methods=['GET', 'POST'])
 def edit_fullstack_catalog_item(fs_item):
 	# Check to see if the user is logged in
@@ -110,6 +111,7 @@ def edit_fullstack_catalog_item(fs_item):
 	return render_template('edit_skill_item.html', skill_item = item, options = options_arr, user_state = login_session)
 
 
+
 @app.route('/catalog/<fs_item>/delete', methods=['GET', 'POST'])
 def delete_fullstack_catalog_item(fs_item):
 	# Check to see if the user is logged in
@@ -126,6 +128,7 @@ def delete_fullstack_catalog_item(fs_item):
 		session.commit()
 		return redirect(url_for('show_fullstack_catalog'))
 	return render_template('delete_skill_item.html', item=item, user_state = login_session)
+
 
 # Try out an idea, what the heck
 @app.route('/login_link')
@@ -144,22 +147,19 @@ def login_link():
 	return redirect(authorization_url)
 
 
+
 @app.route('/gconnect')
 def gconnect():
 	# What do these lines of code do here? Set up the flow object for exchange of code to token
     flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file('client_secrets.json',
     scopes=['openid', 'email'],
     redirect_uri='http://localhost:8000/gconnect')
-    authorization_response = request.args.get("code", "")
-    
-    #print authorization_response[0]
-    #print "The access token is %s" % 
+    authorization_response = request.args.get("code", "") 
     login_session['access_token'] = flow.fetch_token(code=authorization_response)['access_token']
     userinfo_url = "https://www.googleapis.com/oauth2/v1/userinfo"
     params = {'access_token': login_session['access_token'], 'alt': 'json'}
     answer = requests.get(userinfo_url, params=params)
     data = answer.json()
-
     # Create a user profile
     login_session['username'] = data['name']
     login_session['picture'] = data['picture']
@@ -171,18 +171,8 @@ def gconnect():
     	login_session['user_id'] = create_user(login_session)
     	print 'Creating a new user and setting user id from the database'
 
-
-
-    # render a template
-    output = ''
-    output += '<h1>Welcome, '
-    output += login_session['username']
-    output += '!</h1>'
-    output += '<img src="'
-    output += login_session['picture']
-    output += ' " style = "width: 300px; height: 300px;border-radius: 150px;-webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
     print "done!"
-    return output
+    return redirect(url_for('show_fullstack_catalog'))
 
 
 # Method to confirm if a user is logged in
