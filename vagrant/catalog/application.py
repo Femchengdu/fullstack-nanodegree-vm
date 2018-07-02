@@ -184,6 +184,8 @@ def gconnect():
     return output
 
 
+# Method to confirm if a user is logged in
+
 #Try disconnecting from the server
 @app.route('/gdisconnect')
 def gdisconnect():
