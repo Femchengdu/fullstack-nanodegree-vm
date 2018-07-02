@@ -38,19 +38,20 @@ session = DBSession()
 @app.route('/')
 @app.route('/catalog')
 def show_fullstack_catalog():
-    fs_skills = session.query(Category).all()
+    fs_categories = session.query(Category).all()
     fs_items = session.query(SkillItem).all()
     """ List all catalog categories and first five catelog items """
-    return render_template('skills_preview.html', fs_skills = fs_skills, fs_items = fs_items, user_state = login_session)
+    return render_template('skills_preview.html', categories = fs_categories, fs_items = fs_items, user_state = login_session)
 
 
 @app.route('/catalog/<category>/')
 def show_fullstack_catalog_items(category):
-	""" Show all items for a skill """
+	""" Show all items for a category """
 	# Search for skills where the category == category
 	category =  session.query(Category).filter_by(name = category).one()
+	fs_categories = session.query(Category).all()
 	fs_items = session.query(SkillItem).filter_by(category_id = category.id)
-	return render_template('skill_items.html', items = fs_items, user_state = login_session, item_category = category.name)
+	return render_template('skill_items.html', items = fs_items, user_state = login_session, item_category = category.name, categories = fs_categories)
 
 
 @app.route('/catalog/<category>/<skill_item>')

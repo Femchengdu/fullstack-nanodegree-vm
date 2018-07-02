@@ -1,7 +1,9 @@
-{% include "login_header.html" %}
-<h4>{{item_category}} Items</h4>
-{%for item in items%}
-<a href="{{url_for('show_fullstack_catalog_item', category = item.category.name, skill_item = item.name)}}">
-{{item['name']}}<br>
-</a>
-{%endfor%}
+{% extends "catalog.html" %}
+{%block content%}
+	<h4>{{item_category}} Items</h4>
+	{%for item in items%}
+	<a href="{{url_for('show_fullstack_catalog_item', category = item.category.name, skill_item = item.name)}}">
+	{{item['name']}}<br>
+	</a>
+	{%endfor%}
+{%endblock%}
