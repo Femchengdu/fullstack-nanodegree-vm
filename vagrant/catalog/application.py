@@ -251,16 +251,16 @@ def create_user(login_session):
 
 
 # Get all skills
-@app.route('/api/items')
-def items():
-	return get_all_skills()
+@app.route('/<skill>/json/')
+def item(skill):
+	return get_skill_item(skill)
 
 
 # Define the get_all_skills method
-def get_all_skills():
+def get_skill_item(item_name):
 	# Get all skills
-	skills = session.query(SkillItem).all()
-	return jsonify(items=[i.serialize for i in skills])
+	skill = session.query(SkillItem).filter_by(name = item_name).one()
+	return jsonify(skill.serialize)
 
 
 if __name__ == '__main__':
