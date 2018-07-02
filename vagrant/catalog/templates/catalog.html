@@ -7,6 +7,7 @@
 	<main>
 		{%include "login_header.html"%}
 		<section>
+			<h1>Categories</h1>
 			{%for category in categories %}
 				<a href="{{url_for('show_fullstack_catalog_items', category = category.name)}}">
 				{{category.name}}<br>
