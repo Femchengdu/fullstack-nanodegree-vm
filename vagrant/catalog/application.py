@@ -24,6 +24,9 @@ from flask import make_response
 import requests
 
 
+# To disable ssl check during development
+import os 
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 
 	
@@ -142,7 +145,7 @@ def login_link():
     scopes=['openid', 'email'],
     redirect_uri='http://localhost:8000/gconnect')
 	# set the state in the request
-	authorization_url, state = flow.authorization_url(access_type='offline', include_granted_scopes='true')
+	authorization_url, state = flow.authorization_url(access_type='offline', state=state, include_granted_scopes='true')
 	# redirect to the url with state as parameter included
 	return redirect(authorization_url)
 
@@ -150,40 +153,54 @@ def login_link():
 
 @app.route('/gconnect')
 def gconnect():
-	# What do these lines of code do here? Set up the flow object for exchange of code to token
-    flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file('client_secrets.json',
-    scopes=['openid', 'email'],
-    redirect_uri='http://localhost:8000/gconnect')
-    authorization_response = request.args.get("code", "") 
-    login_session['access_token'] = flow.fetch_token(code=authorization_response)['access_token']
-    userinfo_url = "https://www.googleapis.com/oauth2/v1/userinfo"
-    params = {'access_token': login_session['access_token'], 'alt': 'json'}
-    answer = requests.get(userinfo_url, params=params)
-    data = answer.json()
-    # Create a user profile
-    login_session['username'] = data['name']
-    login_session['picture'] = data['picture']
-    login_session['email'] = data['email']
-    if get_user_id(login_session['email']) != None:
-    	login_session['user_id'] = get_user_id(login_session['email'])
-    	print 'Setting user id from the datbase'
-    else:
-    	login_session['user_id'] = create_user(login_session)
-    	print 'Creating a new user and setting user id from the database'
+	# Check to see if the state token match
+	if request.args.get('state') != login_session['state']:
+		response = make_response(json.dumps('Invalid state parameter.'), 401)
+		response.headers['Content-Type'] = 'application/json'
+		return response
+	else:
+		print "Everything matches here thanks"
+	# Set the state variable for use in the flow object
+	state2 = login_session['state']
+	# Set up the flow object for exchange of access code to token
+	flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file('client_secrets.json', scopes=['openid', 'email'], redirect_uri='http://localhost:8000/gconnect', state=state2)
+	#Capure the url of the callback request from google
+	authorization_response = request.url
+	# Change to match google
+	flow.fetch_token(authorization_response=authorization_response)
+	# set the credentials from the flow into a variable
+	# which has the following keys
+	# (refresh_token, token_uri, client_id, client_secret and scopes)
+	credentials = flow.credentials
+	# Get the access token as per the google docs example
+	login_session['access_token'] = credentials.token
+	# Hybrid into udacity method
+	userinfo_url = "https://www.googleapis.com/oauth2/v1/userinfo"
+	params = {'access_token': login_session['access_token'], 'alt': 'json'}
+	# Use the access toke to request the users data
+	answer = requests.get(userinfo_url, params=params)
+	data = answer.json()
+	# Create a user profile
+	login_session['username'] = data['name']
+	login_session['picture'] = data['picture']
+	login_session['email'] = data['email']
+	if get_user_id(login_session['email']) != None:
+		login_session['user_id'] = get_user_id(login_session['email'])
+		print 'Setting user id from the datbase'
+	else:
+		login_session['user_id'] = create_user(login_session)
+		print 'Creating a new user and setting user id from the database'
 
-    print "done!"
-    return redirect(url_for('show_fullstack_catalog'))
+	print "done!"
+	return redirect(url_for('show_fullstack_catalog'))
 
 
-# Method to confirm if a user is logged in
-
-#Try disconnecting from the server
+# Disconnecting from the server
 @app.route('/gdisconnect')
 def gdisconnect():
 	# Refactor so it does not break the code if  the user isn't logged in (keyError: 'access_token')
 	if login_session['access_token']:
-		print 'The access token is %s' % login_session['access_token']
-		print 'The username is: %s' % login_session['username']
+		# Construct the URL to revoke the access token
 		disconnect_url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % login_session['access_token']
 		# Make the http call
 		http_obj = httplib2.Http()
@@ -195,9 +212,10 @@ def gdisconnect():
 			del login_session['username']
 			del login_session['email']
 			del login_session['picture']
-			response = make_response(json.dumps('Successfully disconnected.'), 200)
-			response.headers['Content-Type'] = 'application/json'
-			return response
+			# response = make_response(json.dumps('Successfully disconnected.'), 200)
+			# response.headers['Content-Type'] = 'application/json'
+			# Maybe throw in a flash message here more user friendly
+			return redirect(url_for('show_fullstack_catalog'))
 		else:
 			response = make_response(json.dumps('Failed to disconnected.'), 400)
 			response.headers['Content-Type'] = 'application/json'
