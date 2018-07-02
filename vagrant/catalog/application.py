@@ -48,7 +48,8 @@ def show_fullstack_catalog():
 def show_fullstack_catalog_items(category):
 	""" Show all items for a skill """
 	# Search for skills where the category == category
-	fs_items = session.query(SkillItem).all()
+	category =  session.query(Category).filter_by(name = category).one()
+	fs_items = session.query(SkillItem).filter_by(category_id = category.id)
 	return render_template('skill_items.html', items = fs_items, user_state = login_session)
 
 
