@@ -1,6 +1,7 @@
-{% include "login_header.html" %}
-<h3>Details of a skill note that you need to be logged in to do this and this should reflect in the path chengdu_ruby_python!</h3>
-{{creator_obj.name}}<br>
-{{creator_obj.picture}}<br>
-{{item.description}}<br>
-<a href="{{url_for('edit_fullstack_catalog_item', fs_item = item.name)}}">Edit Skill</a> | <a href="{{url_for('delete_fullstack_catalog_item', fs_item = item.name)}}">Delete Skill</a>
+{% extends "catalog.html" %}
+{%block content%}
+	<h4>{{item.name}}</h4>
+	<h5>Creator: {{creator_obj.name}}</h5>
+	<p>{{item.description}}</p><br>
+	<a href="{{url_for('edit_fullstack_catalog_item', fs_item = item.name)}}">Edit Skill</a> | <a href="{{url_for('delete_fullstack_catalog_item', fs_item = item.name)}}">Delete Skill</a>
+{%endblock%}

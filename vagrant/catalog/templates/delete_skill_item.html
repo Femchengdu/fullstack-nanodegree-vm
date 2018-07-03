@@ -1,8 +1,8 @@
-{% include "login_header.html" %}
-<section>
-	<h3>Delete Item</h3>
+{% extends "catalog.html" %}
+{%block content%}
+	<h3>{{item.name}}</h3>
 	Are you sure you want to delete this item?
 	<form action = "{{ url_for('delete_fullstack_catalog_item', fs_item = item.name)}}" method = "post">
 		<input type="submit" value="Delete">
 	</form>	
-</section>
+{%endblock%}

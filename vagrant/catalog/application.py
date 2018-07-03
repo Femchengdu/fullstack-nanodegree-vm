@@ -40,6 +40,8 @@ session = DBSession()
 @app.route('/catalog/')
 def show_fullstack_catalog():
 	""" List all catalog categories and first five catelog items """
+	# Solve connect thread issue
+	session = DBSession()
 	fs_categories = session.query(Category).all()
 	fs_items = session.query(SkillItem).limit(5)
 	return render_template('skills_preview.html', categories = fs_categories, fs_items = fs_items, user_state = login_session)
@@ -48,6 +50,8 @@ def show_fullstack_catalog():
 @app.route('/catalog/<category>/')
 def show_fullstack_catalog_items(category):
 	""" Show all items for a category """
+	# Solve connect thread issue
+	session = DBSession()
 	category =  session.query(Category).filter_by(name = category).one()
 	fs_categories = session.query(Category).all()
 	fs_items = session.query(SkillItem).filter_by(category_id = category.id)
@@ -57,23 +61,27 @@ def show_fullstack_catalog_items(category):
 @app.route('/catalog/<category>/<skill_item>')
 def show_fullstack_catalog_item(category, skill_item):
 	""" Show detail for a skill item"""
+	session = DBSession()
 	fs_item =  session.query(SkillItem).filter_by(name = skill_item).one()
 	fs_item_desc = fs_item.description
+	fs_categories = session.query(Category).all()
 	# Pass the creator object here for display on the page.
 	creator = get_user_info(fs_item.user_id)
 	#print 'The creator name is %s ' % creator.name
 	if 'user_id' in login_session and (login_session['user_id'] == creator.id):
 		print 'The login sesssion id is: %d' % login_session['user_id']
 		print 'The skill creator is logged in! you may edit or delete this item.'
-		return render_template('skill_item.html', item = fs_item, creator_obj = creator, user_state = login_session)
+		return render_template('skill_item.html', item = fs_item, creator_obj = creator, user_state = login_session, categories = fs_categories)
 	else:
 		print 'You are not the skill creator you are viewing the public page'
-		return render_template('public_skill_item.html', item = fs_item, creator_obj = creator, user_state = login_session)
+		return render_template('public_skill_item.html', item = fs_item, creator_obj = creator, user_state = login_session, categories = fs_categories)
 
 
 @app.route('/catalog/new', methods=['GET', 'POST'])
 def new_fullstack_catalog_item():
 	""" Create a skill item"""
+	# Solve connect thread issue
+	session = DBSession()
 	# Check to see if the user is logged in
 	if 'username' not in login_session:
 		# return the user to the home page where the login link resides
@@ -87,12 +95,14 @@ def new_fullstack_catalog_item():
 		session.add(new_item)
 		session.commit()
 		return redirect(url_for('show_fullstack_catalog'))
-	return render_template('new_skill_item.html', categories = options_arr, user_state = login_session)
+	return render_template('new_skill_item.html', options = options_arr, user_state = login_session, categories = cat_all)
 
 
 @app.route('/catalog/<fs_item>/edit', methods=['GET', 'POST'])
 def edit_fullstack_catalog_item(fs_item):
 	""" Edit a skill item"""
+	# Solve connect thread issue
+	session = DBSession()
 	item =  session.query(SkillItem).filter_by(name = fs_item).one()
 	# Check to see if the user is logged in.
 	if 'user_id' not in login_session or (login_session['user_id'] != item.user_id):	
@@ -108,14 +118,17 @@ def edit_fullstack_catalog_item(fs_item):
 		session.add(item)
 		session.commit()
 		return redirect(url_for('show_fullstack_catalog'))
-	return render_template('edit_skill_item.html', skill_item = item, options = options_arr, user_state = login_session)
+	return render_template('edit_skill_item.html', skill_item = item, options = options_arr, user_state = login_session, categories = cat_all)
 
 
 
 @app.route('/catalog/<fs_item>/delete', methods=['GET', 'POST'])
 def delete_fullstack_catalog_item(fs_item):
 	""" Delete a skill item"""
+	# Solve connect thread issue
+	session = DBSession()
 	item =  session.query(SkillItem).filter_by(name = fs_item).one()
+	cat_all = session.query(Category).all()
 	# Check to see if the user is logged in
 	if 'user_id' not in login_session or (login_session['user_id'] != item.user_id):	
 		# return the user to the home page and maybe flash a message saying you don't have permission
@@ -125,7 +138,7 @@ def delete_fullstack_catalog_item(fs_item):
 		session.delete(item)
 		session.commit()
 		return redirect(url_for('show_fullstack_catalog'))
-	return render_template('delete_skill_item.html', item=item, user_state = login_session)
+	return render_template('delete_skill_item.html', item=item, user_state = login_session, categories = cat_all)
 
 
 # Use a Login route instead of Javascript :-) don't know enough javascript yet.
@@ -149,6 +162,8 @@ def login_link():
 @app.route('/gconnect')
 def gconnect():
 	"""Callback route from google after authorization/authentication"""
+	# Solve connect thread issue
+	session = DBSession()
 	# Check to see if the state token match
 	if request.args.get('state') != login_session['state']:
 		response = make_response(json.dumps('Invalid state parameter.'), 401)

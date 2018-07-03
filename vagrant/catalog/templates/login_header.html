@@ -1,7 +1,7 @@
-<section>
+<header class="lgin_lgout">
 	{% if 'user_id' not in user_state %}
-		<a href="{{url_for('login_link')}}">Login</a>
+		<a href="{{url_for('login_link')}}">Login</a> | <a href="{{url_for('show_fullstack_catalog')}}">Home</a>
 	{% else %}
-		<a href="{{url_for('gdisconnect')}}">Logout</a>
+		<a href="{{url_for('gdisconnect')}}">Logout</a> | <a href="{{url_for('show_fullstack_catalog')}}">Home</a>
 	{% endif %}
-</section>
+</header>

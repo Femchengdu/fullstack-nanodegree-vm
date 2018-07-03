@@ -1,5 +1,7 @@
-{% include "login_header.html" %}
-<h3>Details of a skill note that you need to be logged in to do this and this should reflect in the path chengdu_ruby_python!</h3>
-{{creator_obj.name}}<br>
-{{creator_obj.picture}}<br>
-{{item.description}}
+{% extends "catalog.html" %}
+	{%block content%}
+	<h4>{{item.name}}</h4>
+	{{creator_obj.name}}<br>
+	{{creator_obj.picture}}<br>
+	{{item.description}}
+{%endblock%}
