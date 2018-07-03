@@ -7,15 +7,13 @@ from sqlalchemy.orm import sessionmaker
 from database_setup import Base, Category, SkillItem, User
 
 
-# Imports for the secret login
+# Imports for the CSRF and login
 from flask import session as login_session
 import random, string
 
 
 # Import modules for flow control
-# from oauth2client.client import flow_from_clientsecrets
-# from oauth2client.client import FlowExchangeError
-# I think these once will do the trick
+# Google docs and udacity
 import google.oauth2.credentials
 import google_auth_oauthlib.flow
 import httplib2
@@ -41,16 +39,15 @@ session = DBSession()
 @app.route('/')
 @app.route('/catalog/')
 def show_fullstack_catalog():
-    fs_categories = session.query(Category).all()
-    fs_items = session.query(SkillItem).all()
-    """ List all catalog categories and first five catelog items """
-    return render_template('skills_preview.html', categories = fs_categories, fs_items = fs_items, user_state = login_session)
+	""" List all catalog categories and first five catelog items """
+	fs_categories = session.query(Category).all()
+	fs_items = session.query(SkillItem).limit(5)
+	return render_template('skills_preview.html', categories = fs_categories, fs_items = fs_items, user_state = login_session)
 
 
 @app.route('/catalog/<category>/')
 def show_fullstack_catalog_items(category):
 	""" Show all items for a category """
-	# Search for skills where the category == category
 	category =  session.query(Category).filter_by(name = category).one()
 	fs_categories = session.query(Category).all()
 	fs_items = session.query(SkillItem).filter_by(category_id = category.id)
@@ -73,6 +70,7 @@ def show_fullstack_catalog_item(category, skill_item):
 		print 'You are not the skill creator you are viewing the public page'
 		return render_template('public_skill_item.html', item = fs_item, creator_obj = creator, user_state = login_session)
 
+
 @app.route('/catalog/new', methods=['GET', 'POST'])
 def new_fullstack_catalog_item():
 	""" Create a skill item"""
@@ -94,10 +92,9 @@ def new_fullstack_catalog_item():
 
 @app.route('/catalog/<fs_item>/edit', methods=['GET', 'POST'])
 def edit_fullstack_catalog_item(fs_item):
-	# Check to see if the user is logged in
 	""" Edit a skill item"""
 	item =  session.query(SkillItem).filter_by(name = fs_item).one()
-	#if 'user_id' not in login_session:
+	# Check to see if the user is logged in.
 	if 'user_id' not in login_session or (login_session['user_id'] != item.user_id):	
 		# return the user to the home page and maybe flash a message saying you don't have permission
 		return redirect('/')
@@ -117,11 +114,9 @@ def edit_fullstack_catalog_item(fs_item):
 
 @app.route('/catalog/<fs_item>/delete', methods=['GET', 'POST'])
 def delete_fullstack_catalog_item(fs_item):
-	# Check to see if the user is logged in
-	
 	""" Delete a skill item"""
 	item =  session.query(SkillItem).filter_by(name = fs_item).one()
-	#if 'user_id' not in login_session:
+	# Check to see if the user is logged in
 	if 'user_id' not in login_session or (login_session['user_id'] != item.user_id):	
 		# return the user to the home page and maybe flash a message saying you don't have permission
 		return redirect('/')
@@ -133,7 +128,7 @@ def delete_fullstack_catalog_item(fs_item):
 	return render_template('delete_skill_item.html', item=item, user_state = login_session)
 
 
-# Try out an idea, what the heck
+# Use a Login route instead of Javascript :-) don't know enough javascript yet.
 @app.route('/login_link')
 def login_link():
 	# Create state
@@ -153,6 +148,7 @@ def login_link():
 
 @app.route('/gconnect')
 def gconnect():
+	"""Callback route from google after authorization/authentication"""
 	# Check to see if the state token match
 	if request.args.get('state') != login_session['state']:
 		response = make_response(json.dumps('Invalid state parameter.'), 401)
@@ -166,11 +162,11 @@ def gconnect():
 	flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file('client_secrets.json', scopes=['openid', 'email'], redirect_uri='http://localhost:8000/gconnect', state=state2)
 	#Capure the url of the callback request from google
 	authorization_response = request.url
-	# Change to match google
+	# Change to match google docs
 	flow.fetch_token(authorization_response=authorization_response)
 	# set the credentials from the flow into a variable
-	# which has the following keys
-	# (refresh_token, token_uri, client_id, client_secret and scopes)
+	# which has the following keys I only use of of them though
+	# (token, refresh_token, token_uri, client_id, client_secret and scopes)
 	credentials = flow.credentials
 	# Get the access token as per the google docs example
 	login_session['access_token'] = credentials.token
@@ -198,6 +194,7 @@ def gconnect():
 # Disconnecting from the server
 @app.route('/gdisconnect')
 def gdisconnect():
+	"""This method enables the user to logout and revoke the access token"""
 	# Refactor so it does not break the code if  the user isn't logged in (keyError: 'access_token')
 	if login_session['access_token']:
 		# Construct the URL to revoke the access token
@@ -212,8 +209,6 @@ def gdisconnect():
 			del login_session['username']
 			del login_session['email']
 			del login_session['picture']
-			# response = make_response(json.dumps('Successfully disconnected.'), 200)
-			# response.headers['Content-Type'] = 'application/json'
 			# Maybe throw in a flash message here more user friendly
 			return redirect(url_for('show_fullstack_catalog'))
 		else:
@@ -224,7 +219,6 @@ def gdisconnect():
 
 
 # Code for the local permissions sysemem
-
 def get_user_id(login_email):
 	""" Returns the logged in users user id if they are in the users database"""
 	try:
@@ -250,17 +244,39 @@ def create_user(login_session):
 	return user.id
 
 
-# Get all skills
-@app.route('/<skill>/json/')
+# Two JSON endpoints are listed below with their supporting methods
+@app.route('/item/<skill>/json/')
 def item(skill):
+	"""
+	Get the details of a skill item. Note
+	sapces in the skill name should be replaced with a (-)
+	"""
 	return get_skill_item(skill)
 
 
-# Define the get_all_skills method
+# Get items by category
+@app.route('/category/<category>/json/')
+def category(category):
+	"""
+	Get the skills of a given category. Note spaces
+	in the category name should be replaced with a (-)
+	"""
+	return get_category_items(category)
+
+# Get a skill item
 def get_skill_item(item_name):
-	# Get all skills
-	skill = session.query(SkillItem).filter_by(name = item_name).one()
+	"""Method to get and serialize the skill item"""
+	skill = session.query(SkillItem).filter_by(name = item_name.replace('-', ' ')).one()
 	return jsonify(skill.serialize)
+
+
+
+#Get a category and item
+def get_category_items(category):
+	"""Method to get the category with associated skill items and serialize the result."""
+	category_item = session.query(Category).filter_by(name = category.replace('-', ' ')).one()
+	skill_items = session.query(SkillItem).filter_by(category_id = category_item.id).all()
+	return jsonify(category=[category_item.serialize], skills=[item.serialize for item in skill_items])	
 
 
 if __name__ == '__main__':

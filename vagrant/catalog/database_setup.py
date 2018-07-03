@@ -21,6 +21,14 @@ class Category(Base):
 	id = Column(Integer, primary_key=True)
 	name = Column(String(200), nullable=False)
 
+	@property
+	def serialize(self):
+		"""This returns a category in a serialzed format"""
+		return {
+				'id': self.id,
+				'name': self.name
+				}
+
 
 class SkillItem(Base):
 	__tablename__ = 'skill_item'
@@ -35,11 +43,13 @@ class SkillItem(Base):
 
 	@property
 	def serialize(self):
-		"""This will return skill item data in a serializeable format"""
+		"""This will return skill item data in a serialized format"""
 		return {
 				'id': self.id,
 				'name': self.name,
-				'description': self.description
+				'description': self.description,
+				'category': self.category.name,
+				'creator': self.user.name
 				}
 
 
