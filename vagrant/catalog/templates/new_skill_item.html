@@ -6,7 +6,7 @@
 	<label for="title">Title</label><br>
 	<input type="text" name="title"><br>
 	<label for="description">Description</label><br>
-	<input type="text" name="description"><br>
+	<textarea type="text" name="description">Some text...</textarea><br>
 	<label for="category">Category</label><br>
 	<select name="category">
 		{%for cat in options%}
@@ -16,3 +16,4 @@
 	<input type="submit" value="Submit">
 </form>
 {%endblock%}
+

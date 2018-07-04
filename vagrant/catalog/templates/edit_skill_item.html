@@ -5,7 +5,7 @@
 		<label for="title">Title</label><br>
 		<input type="text" name="name" value="{{skill_item.name}}"><br>
 		<label for="description">Description</label><br>
-		<input type="text" name="description" value="{{skill_item.description}}"><br>
+		<textarea type="text" name="description" >{{skill_item.description}}</textarea><br>
 		<label for="category">Category</label><br>
 		<select name="category">
 			{%for opt in options%}
