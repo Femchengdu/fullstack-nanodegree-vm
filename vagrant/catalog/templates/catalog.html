@@ -1,24 +1,24 @@
 <!DOCTYPE html>
 <html>
-<head>
-	<title>My Skills Catalog</title>
-	<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='styles.css')}}">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
-<body>
-	<main class="container">
-		{%include "login_header.html"%}
-		<section class="category">
-			<h3>Categories</h3>
-			{%for category in categories %}
+	<head>
+		<title>My Skills Catalog</title>
+		<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='styles.css')}}">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	</head>
+	<body>
+		<main class="container">
+			{%include "login_header.html"%}
+			<section class="category">
+				<h3>Categories</h3>
+				{%for category in categories %}
 				<a href="{{url_for('show_fullstack_catalog_items', category = category.name)}}">
 				{{category.name}}<br>
 				</a>
-			{%endfor%}
-		</section>
-		<section class="skill_item">
-			{%block content%}{%endblock%}
-		</section>
-	</main>
-</body>
+				{%endfor%}
+			</section>
+			<section class="skill_item">
+				{%block content%}{%endblock%}
+			</section>
+		</main>
+	</body>
 </html>

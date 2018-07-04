@@ -46,7 +46,11 @@ category5 = Category(name="Linux Server")
 session.add(category5)
 session.commit()
 print 'Added Category5'
-skillItem1 = SkillItem(user_id=1, name="JavaScript", description="Frontend JavaScript functionality", category=category4)
+skillItem1 = SkillItem(
+    user_id=1,
+    name="JavaScript",
+    description="Frontend JavaScript functionality",
+    category=category4)
 session.add(skillItem1)
 session.commit()
 
