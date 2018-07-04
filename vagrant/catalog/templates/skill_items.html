@@ -6,4 +6,5 @@
 	{{item['name']}}<br>
 	</a>
 	{%endfor%}
+	<a href="{{url_for('api_category', category = item_category)}}">API Link</a>
 {%endblock%}

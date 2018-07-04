@@ -67,7 +67,6 @@ def show_fullstack_catalog_item(category, skill_item):
 	fs_categories = session.query(Category).all()
 	# Pass the creator object here for display on the page.
 	creator = get_user_info(fs_item.user_id)
-	#print 'The creator name is %s ' % creator.name
 	if 'user_id' in login_session and (login_session['user_id'] == creator.id):
 		print 'The login sesssion id is: %d' % login_session['user_id']
 		print 'The skill creator is logged in! you may edit or delete this item.'
@@ -260,27 +259,32 @@ def create_user(login_session):
 
 
 # Two JSON endpoints are listed below with their supporting methods
-@app.route('/item/<skill>/json/')
-def item(skill):
+@app.route('/catalog/<category>/<skill_item>/json/')
+def api_item(category, skill_item):
 	"""
 	Get the details of a skill item. Note
 	sapces in the skill name should be replaced with a (-)
 	"""
-	return get_skill_item(skill)
+	# Solve connect thread issue
+	session = DBSession()
+	return get_skill_item(skill_item)
 
 
 # Get items by category
-@app.route('/category/<category>/json/')
-def category(category):
+@app.route('/catalog/<category>/json/')
+def api_category(category):
 	"""
 	Get the skills of a given category. Note spaces
 	in the category name should be replaced with a (-)
 	"""
+	# Solve connect thread issue
+	session = DBSession()
 	return get_category_items(category)
 
 # Get a skill item
 def get_skill_item(item_name):
 	"""Method to get and serialize the skill item"""
+	session = DBSession()
 	skill = session.query(SkillItem).filter_by(name = item_name.replace('-', ' ')).one()
 	return jsonify(skill.serialize)
 
@@ -289,6 +293,7 @@ def get_skill_item(item_name):
 #Get a category and item
 def get_category_items(category):
 	"""Method to get the category with associated skill items and serialize the result."""
+	session = DBSession()
 	category_item = session.query(Category).filter_by(name = category.replace('-', ' ')).one()
 	skill_items = session.query(SkillItem).filter_by(category_id = category_item.id).all()
 	return jsonify(category=[category_item.serialize], skills=[item.serialize for item in skill_items])	

@@ -1,7 +1,9 @@
 {% extends "catalog.html" %}
 {%block content%}
 	<h4>{{item.name}}</h4>
-	<h5>Creator: {{creator_obj.name}}</h5>
+	<h5>Creator</h5>
+	{{creator_obj.name}}
+	<h5>Description</h5>
 	<p>{{item.description}}</p><br>
-	<a href="{{url_for('edit_fullstack_catalog_item', fs_item = item.name)}}">Edit Skill</a> | <a href="{{url_for('delete_fullstack_catalog_item', fs_item = item.name)}}">Delete Skill</a>
+	<a href="{{url_for('edit_fullstack_catalog_item', fs_item = item.name)}}">Edit Skill</a> | <a href="{{url_for('delete_fullstack_catalog_item', fs_item = item.name)}}">Delete Skill</a> | <a href="{{url_for('api_item', category = item.category.name, skill_item = item.name)}}">API Link</a>
 {%endblock%}

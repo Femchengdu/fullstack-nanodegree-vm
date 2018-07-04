@@ -1,7 +1,9 @@
 {% extends "catalog.html" %}
 	{%block content%}
 	<h4>{{item.name}}</h4>
+	<h5>Description</h5>
+	<p>{{item.description}}</p><br>
+	<h5>Creator</h5>
 	{{creator_obj.name}}<br>
-	{{creator_obj.picture}}<br>
-	{{item.description}}
+	<a href="{{url_for('api_item', category = item.category.name, skill_item = item.name)}}">API Link</a>
 {%endblock%}
